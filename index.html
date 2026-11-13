@@ -27,12 +27,24 @@
       var canvas = document.getElementById('unity-canvas');
       var loadingProgress = 0;
       var loadingFinished = false;
-      var loadingEnglish = !/^ru(?:-|$)/i.test(navigator.language || 'ru');
-      if (loadingEnglish) {
-        document.getElementById('loading-title').src = 'loading-title-en.png';
-        document.getElementById('loading-title').alt = 'Loading…';
-        document.getElementById('loading-screen').setAttribute('aria-label', 'Loading game');
-      }
+      var loadingEnglish = false;
+      window.setGameLoadingLanguage = function (language) {
+        if (!language) return;
+        loadingEnglish = !/^ru(?:-|$)/i.test(String(language));
+        document.documentElement.lang = loadingEnglish ? 'en' : 'ru';
+        var title = document.getElementById('loading-title');
+        var screen = document.getElementById('loading-screen');
+        if (title) {
+          title.src = loadingEnglish ? 'loading-title-en.png' : 'loading-title-ru.png';
+          title.alt = loadingEnglish ? 'Loading…' : 'Загрузка…';
+        }
+        if (screen) screen.setAttribute('aria-label', loadingEnglish ? 'Loading game' : 'Загрузка игры');
+        var message = document.getElementById('loading-error');
+        if (message && !message.hidden) message.textContent = loadingEnglish
+          ? 'Unable to load the game. Please refresh the page.'
+          : 'Не удалось загрузить игру. Обновите страницу.';
+      };
+      // Keep Russian until the platform SDK reports its language.
       window.updateGameLoadingProgress = function (progress) {
         if (loadingFinished) return;
         loadingProgress = Math.max(loadingProgress, Math.min(1, Math.max(0, progress)));
